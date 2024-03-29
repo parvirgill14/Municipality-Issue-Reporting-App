@@ -83,4 +83,5 @@ public class SignUpActivity extends AppCompatActivity {
         String emailRegex = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
         return email.matches(emailRegex);
     }
+
 }
