@@ -94,7 +94,7 @@ public class ReportIssueActivity extends AppCompatActivity {
                 fileRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                     @Override
                     public void onSuccess(Uri uri) {
-
+                        progressBar.setVisibility(View.INVISIBLE);
                         Model model = new Model(uri.toString());
                         String modelID = root.push().getKey();
                         root.child(modelID).setValue(model);
