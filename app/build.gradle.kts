@@ -1,6 +1,9 @@
 plugins {
     alias(libs.plugins.androidApplication)
     id("com.google.gms.google-services")
+    alias(libs.plugins.googleAndroidLibrariesMapsplatformSecretsGradlePlugin)
+
+
 }
 
 android {
@@ -30,9 +33,13 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
+    implementation("com.google.android.gms:play-services-maps:18.0.0")
     implementation(libs.play.services.location)
     implementation(libs.appcompat)
     implementation(libs.material)
