@@ -67,7 +67,7 @@ public class ReportIssueActivity extends AppCompatActivity {
         uploadBtn.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
                 if(imageUri != null){
-                    uploadToFirebase(imageUri);
+                    uploadToFirebase(imageUri, latitude, longitude);
                 }
                 else{
                     Toast.makeText(ReportIssueActivity.this, "PLease Select Image", Toast.LENGTH_SHORT).show();
@@ -86,34 +86,25 @@ public class ReportIssueActivity extends AppCompatActivity {
         }
     }
 
-    private void uploadToFirebase(Uri imageUri){
-        StorageReference fileRef = imgref.child(System.currentTimeMillis()+"."+getFileExtension(imageUri));
-        fileRef.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                fileRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                    @Override
-                    public void onSuccess(Uri uri) {
+    private void uploadToFirebase(Uri imageUri, double latitude, double longitude) {
+        StorageReference fileRef = imgref.child(System.currentTimeMillis() + "." + getFileExtension(imageUri));
+        fileRef.putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
+                    fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
                         progressBar.setVisibility(View.INVISIBLE);
-                        Model model = new Model(uri.toString());
+                        String imageURL = uri.toString();
+                        Model model = new Model(imageURL, latitude, longitude);
                         String modelID = root.push().getKey();
-                        root.child(modelID).setValue(model);
-                        Toast.makeText(ReportIssueActivity.this,"Uploaded",Toast.LENGTH_SHORT).show();
-                    }
+                        root.child(modelID).setValue(model).addOnSuccessListener(aVoid -> {
+                            Toast.makeText(ReportIssueActivity.this, "Uploaded", Toast.LENGTH_SHORT).show();
+                        }).addOnFailureListener(e -> {
+                            Toast.makeText(ReportIssueActivity.this, "Uploading Failed", Toast.LENGTH_SHORT).show();
+                        });
+                    });
+                }).addOnProgressListener(snapshot -> progressBar.setVisibility(View.VISIBLE))
+                .addOnFailureListener(e -> {
+                    progressBar.setVisibility(View.INVISIBLE);
+                    Toast.makeText(ReportIssueActivity.this, "Uploading Failed", Toast.LENGTH_SHORT).show();
                 });
-            }
-        }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
-                progressBar.setVisibility(View.VISIBLE);
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                progressBar.setVisibility(View.INVISIBLE);
-                Toast.makeText(ReportIssueActivity.this,"Uploading Failed",Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     private String getFileExtension(Uri mUri){
