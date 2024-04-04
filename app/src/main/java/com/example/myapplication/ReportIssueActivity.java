@@ -106,7 +106,7 @@ public class ReportIssueActivity extends AppCompatActivity {
                     public void onSuccess(Uri uri) {
                         progressBar.setVisibility(View.INVISIBLE);
                         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                        Model model = new Model(title, description, uri.toString(), latitude, longitude, user.getUid());
+                        Model model = new Model(title, description, uri.toString(), latitude, longitude, user.getUid(), 0, 999999999);
                         String modelID = root.push().getKey();
                         root.child(modelID).setValue(model);
                         navigateToNextPage();
