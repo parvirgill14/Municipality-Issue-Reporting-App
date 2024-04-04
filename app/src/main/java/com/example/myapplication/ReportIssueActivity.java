@@ -33,7 +33,7 @@ public class ReportIssueActivity extends AppCompatActivity {
     private Button uploadBtn;
     private ImageView imageView;
     private ProgressBar progressBar;
-    private DatabaseReference root= FirebaseDatabase.getInstance().getReference().child("Image");
+    private DatabaseReference root= FirebaseDatabase.getInstance().getReference().child("Issue");
     private StorageReference imgref = FirebaseStorage.getInstance().getReference();
     private double latitude, longitude;
     private TextView latitudeTextView, longitudeTextView;
@@ -66,11 +66,19 @@ public class ReportIssueActivity extends AppCompatActivity {
 
         uploadBtn.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
-                if(imageUri != null){
-                    uploadToFirebase(imageUri, latitude, longitude);
-                }
-                else{
-                    Toast.makeText(ReportIssueActivity.this, "PLease Select Image", Toast.LENGTH_SHORT).show();
+                String title = issueTitle.getText().toString().trim();
+                String description = issueDescription.getText().toString().trim();
+
+                if (!title.isEmpty() && !description.isEmpty()) {
+                    // Check if an image has been selected
+                    if (imageUri != null) {
+                        uploadToFirebase(title, description, imageUri);
+                    } else {
+                        Toast.makeText(ReportIssueActivity.this, "Please select an image", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    // Show a message that title and description should not be empty
+                    Toast.makeText(ReportIssueActivity.this, "Please fill in all the fields", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -86,25 +94,35 @@ public class ReportIssueActivity extends AppCompatActivity {
         }
     }
 
-    private void uploadToFirebase(Uri imageUri, double latitude, double longitude) {
-        StorageReference fileRef = imgref.child(System.currentTimeMillis() + "." + getFileExtension(imageUri));
-        fileRef.putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
-                    fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
+    private void uploadToFirebase(String title, String description, Uri imageUri){
+        StorageReference fileRef = imgref.child(System.currentTimeMillis()+"."+getFileExtension(imageUri));
+        fileRef.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                fileRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
                         progressBar.setVisibility(View.INVISIBLE);
-                        String imageURL = uri.toString();
-                        Model model = new Model(imageURL, latitude, longitude);
+                        Model model = new Model(title, description, uri.toString(), latitude, longitude);
                         String modelID = root.push().getKey();
-                        root.child(modelID).setValue(model).addOnSuccessListener(aVoid -> {
-                            Toast.makeText(ReportIssueActivity.this, "Uploaded", Toast.LENGTH_SHORT).show();
-                        }).addOnFailureListener(e -> {
-                            Toast.makeText(ReportIssueActivity.this, "Uploading Failed", Toast.LENGTH_SHORT).show();
-                        });
-                    });
-                }).addOnProgressListener(snapshot -> progressBar.setVisibility(View.VISIBLE))
-                .addOnFailureListener(e -> {
-                    progressBar.setVisibility(View.INVISIBLE);
-                    Toast.makeText(ReportIssueActivity.this, "Uploading Failed", Toast.LENGTH_SHORT).show();
+                        root.child(modelID).setValue(model);
+                        navigateToNextPage();
+                        Toast.makeText(ReportIssueActivity.this,"Uploaded",Toast.LENGTH_SHORT).show();
+                    }
                 });
+            }
+        }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
+                progressBar.setVisibility(View.VISIBLE);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                progressBar.setVisibility(View.INVISIBLE);
+                Toast.makeText(ReportIssueActivity.this,"Uploading Failed",Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private String getFileExtension(Uri mUri){
@@ -135,6 +153,9 @@ public class ReportIssueActivity extends AppCompatActivity {
         }
     }
 
+    private void navigateToNextPage() {
+        Intent intent = new Intent(ReportIssueActivity.this, MainActivity.class); // Replace NextActivity.class with your target activity
+        startActivity(intent);
+    }
+
 }
-
-
