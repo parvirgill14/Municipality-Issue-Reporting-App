@@ -1,20 +1,25 @@
 package com.example.myapplication;
 
+import com.google.firebase.database.ServerValue;
+
 public class Model {
-    private String imageURL;
-    private double latitude;
-    private double longitude;
-    private String title;
-    private String description;
+    private String imageURL, title, description, user;
+    private double latitude,longitude;
+    private int votes;
+    private Object timestamp;
+
     public Model(){
 
     }
-    public Model(String title, String description, String imageURL, double latitude, double longitude){
+    public Model(String title, String description, String imageURL, double latitude, double longitude, String user){
         this.title = title;
         this.description = description;
         this.imageURL= imageURL;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.votes = 0;
+        this.user = user;
+        this.timestamp = ServerValue.TIMESTAMP;
     }
 
     public void setTitle(String title) {
@@ -55,5 +60,29 @@ public class Model {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    public int getVotes() {
+        return votes;
+    }
+
+    public void setVotes(int votes) {
+        this.votes = votes;
+    }
+
+    public Object getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Object timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
     }
 }

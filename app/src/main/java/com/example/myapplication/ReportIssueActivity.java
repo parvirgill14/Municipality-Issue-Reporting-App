@@ -19,6 +19,8 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -103,7 +105,8 @@ public class ReportIssueActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Uri uri) {
                         progressBar.setVisibility(View.INVISIBLE);
-                        Model model = new Model(title, description, uri.toString(), latitude, longitude);
+                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                        Model model = new Model(title, description, uri.toString(), latitude, longitude, user.getUid());
                         String modelID = root.push().getKey();
                         root.child(modelID).setValue(model);
                         navigateToNextPage();
