@@ -22,7 +22,6 @@ public class SignUpActivity extends AppCompatActivity {
     private EditText signupEmail, signupPassword;
     private Button signupButton;
     private TextView loginRedirectText;
-    private String email;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,14 +41,15 @@ public class SignUpActivity extends AppCompatActivity {
                 String pass = signupPassword.getText().toString().trim();
 
                 // Validate email format
-                if (!isValidEmail(email)) {
+                if (user.isEmpty()){
+                    signupEmail.setError("Email cannot be empty");
+                    return;
+                }
+                if (!isValidEmail(user)) {
                     signupEmail.setError("Invalid email format");
                     return;
                 }
 
-                if (user.isEmpty()){
-                    signupEmail.setError("Email cannot be empty");
-                }
                 if (pass.isEmpty()){
                     signupPassword.setError("Password cannot be empty");
                 } else{
@@ -80,7 +80,7 @@ public class SignUpActivity extends AppCompatActivity {
 
     // Function to validate email format using regex
     private boolean isValidEmail(String email) {
-        String emailRegex = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
+        String emailRegex = "[a-zA-Z0-9._+-]+@[a-zA-Z0-9._-]+\\.+[a-zA-Z]{2,}$";
         return email.matches(emailRegex);
     }
 

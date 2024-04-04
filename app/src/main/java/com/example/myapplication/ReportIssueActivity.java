@@ -23,9 +23,6 @@ public class ReportIssueActivity extends AppCompatActivity {
     private double latitude, longitude;
     private TextView latitudeTextView, longitudeTextView;
 
-    private Button submitButton;
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report);
@@ -34,32 +31,7 @@ public class ReportIssueActivity extends AppCompatActivity {
         issueDescription = findViewById(R.id.issueDescriptionEditText);
         latitudeTextView = findViewById(R.id.latitudeTextView); // Find the TextViews
         longitudeTextView = findViewById(R.id.longitudeTextView);
-        submitButton = findViewById(R.id.submitButton);
-
         getLocation();
-
-        submitButton.setOnClickListener(v -> {
-            String title = issueTitle.getText().toString();
-            String description = issueDescription.getText().toString();
-            String imageUrl = ""; // You need to implement image capturing and URL generation here
-
-            // Validate if title and description are not empty
-            if (!title.isEmpty() && !description.isEmpty()) {
-                // Create an intent to pass data back to MainActivity
-                Intent intent = new Intent();
-                intent.putExtra("title", title);
-                intent.putExtra("description", description);
-                intent.putExtra("latitude", latitude);
-                intent.putExtra("longitude", longitude);
-                intent.putExtra("imageUrl", imageUrl);
-
-                // Set the result and finish the activity
-                setResult(RESULT_OK, intent);
-                finish();
-            } else {
-                Toast.makeText(ReportIssueActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
-            }
-        });
 
     }
     private void getLocation() {
@@ -85,19 +57,6 @@ public class ReportIssueActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                getLocation();
-            } else {
-                Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
 }
-
-
 
 
