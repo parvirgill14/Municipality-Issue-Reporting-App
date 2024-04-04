@@ -33,7 +33,7 @@ public class ReportIssueActivity extends AppCompatActivity {
     private Button uploadBtn;
     private ImageView imageView;
     private ProgressBar progressBar;
-    private DatabaseReference root= FirebaseDatabase.getInstance().getReference().child("Image");
+    private DatabaseReference root= FirebaseDatabase.getInstance().getReference().child("Issue");
     private StorageReference imgref = FirebaseStorage.getInstance().getReference();
     private double latitude, longitude;
     private TextView latitudeTextView, longitudeTextView;
@@ -66,11 +66,19 @@ public class ReportIssueActivity extends AppCompatActivity {
 
         uploadBtn.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
-                if(imageUri != null){
-                    uploadToFirebase(imageUri);
-                }
-                else{
-                    Toast.makeText(ReportIssueActivity.this, "PLease Select Image", Toast.LENGTH_SHORT).show();
+                String title = issueTitle.getText().toString().trim();
+                String description = issueDescription.getText().toString().trim();
+
+                if (!title.isEmpty() && !description.isEmpty()) {
+                    // Check if an image has been selected
+                    if (imageUri != null) {
+                        uploadToFirebase(title, description, imageUri);
+                    } else {
+                        Toast.makeText(ReportIssueActivity.this, "Please select an image", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    // Show a message that title and description should not be empty
+                    Toast.makeText(ReportIssueActivity.this, "Please fill in all the fields", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -86,7 +94,7 @@ public class ReportIssueActivity extends AppCompatActivity {
         }
     }
 
-    private void uploadToFirebase(Uri imageUri){
+    private void uploadToFirebase(String title, String description, Uri imageUri){
         StorageReference fileRef = imgref.child(System.currentTimeMillis()+"."+getFileExtension(imageUri));
         fileRef.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
@@ -95,9 +103,10 @@ public class ReportIssueActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Uri uri) {
                         progressBar.setVisibility(View.INVISIBLE);
-                        Model model = new Model(uri.toString());
+                        Model model = new Model(title, description, uri.toString(), latitude, longitude);
                         String modelID = root.push().getKey();
                         root.child(modelID).setValue(model);
+                        navigateToNextPage();
                         Toast.makeText(ReportIssueActivity.this,"Uploaded",Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -142,6 +151,11 @@ public class ReportIssueActivity extends AppCompatActivity {
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
             getLocation();
         }
+    }
+
+    private void navigateToNextPage() {
+        Intent intent = new Intent(ReportIssueActivity.this, MainActivity.class); // Replace NextActivity.class with your target activity
+        startActivity(intent);
     }
 
 }
