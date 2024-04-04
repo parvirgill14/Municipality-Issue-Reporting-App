@@ -4,17 +4,33 @@ public class Model {
     private String imageURL;
     private double latitude;
     private double longitude;
-    private String time;
+    private String title;
+    private String description;
+    public Model(){
 
-    public Model() {
-        // Default constructor required for Firebase Realtime Database
     }
-
-    public Model(String imageURL, double latitude, double longitude) {
-        this.imageURL = imageURL;
+    public Model(String title, String description, String imageURL, double latitude, double longitude){
+        this.title = title;
+        this.description = description;
+        this.imageURL= imageURL;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.time = time;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getImageURL() {
@@ -25,6 +41,10 @@ public class Model {
         this.imageURL = imageURL;
     }
 
+    public double getLongitude() {
+        return longitude;
+    }
+
     public double getLatitude() {
         return latitude;
     }
@@ -33,20 +53,7 @@ public class Model {
         this.latitude = latitude;
     }
 
-    public double getLongitude() {
-        return longitude;
-    }
-
     public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
-
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
-    }
-
 }
