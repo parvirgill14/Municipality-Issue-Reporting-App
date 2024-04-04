@@ -40,6 +40,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        // Enable zoom controls
+        mMap.getUiSettings().setZoomControlsEnabled(true);
+
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Issue");
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -53,7 +56,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     if (location != null) {
                         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                         mMap.addMarker(new MarkerOptions().position(latLng).title(location.getTitle()));
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 9));
                     }
                 }
 
