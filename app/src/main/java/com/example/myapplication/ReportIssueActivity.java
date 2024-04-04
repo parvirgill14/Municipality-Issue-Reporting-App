@@ -32,7 +32,7 @@ public class ReportIssueActivity extends AppCompatActivity {
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private EditText issueTitle, issueDescription;
     private FusedLocationProviderClient fusedLocationClient;
-    private Button uploadBtn;
+    private Button uploadBtn, submitBtn;
     private ImageView imageView;
     private ProgressBar progressBar;
     private DatabaseReference root= FirebaseDatabase.getInstance().getReference().child("Issue");
@@ -49,7 +49,7 @@ public class ReportIssueActivity extends AppCompatActivity {
         issueDescription = findViewById(R.id.issueDescriptionEditText);
         latitudeTextView = findViewById(R.id.latitudeTextView); // Find the TextViews
         longitudeTextView = findViewById(R.id.longitudeTextView);
-        uploadBtn = findViewById(R.id.upload_btn);
+        submitBtn = findViewById(R.id.submitButton);
         progressBar = findViewById((R.id.progressBar));
         imageView = findViewById(R.id.imageView);
 
@@ -66,7 +66,7 @@ public class ReportIssueActivity extends AppCompatActivity {
             }
         });
 
-        uploadBtn.setOnClickListener(new View.OnClickListener(){
+        submitBtn.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
                 String title = issueTitle.getText().toString().trim();
                 String description = issueDescription.getText().toString().trim();
