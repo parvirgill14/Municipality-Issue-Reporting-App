@@ -4,23 +4,28 @@ import com.google.firebase.database.ServerValue;
 
 public class Model {
     private String imageURL, title, description, user;
-    private double latitude,longitude;
+    private double latitude, longitude;
     private int votes;
     private Object timestamp;
+    private boolean active; // New field for indicating whether the issue is active or resolved
 
-    public Model(){
+    public Model() {
 
     }
-    public Model(String title, String description, String imageURL, double latitude, double longitude, String user){
+
+    public Model(String title, String description, String imageURL, double latitude, double longitude, String user) {
         this.title = title;
         this.description = description;
-        this.imageURL= imageURL;
+        this.imageURL = imageURL;
         this.latitude = latitude;
         this.longitude = longitude;
         this.votes = 0;
         this.user = user;
         this.timestamp = ServerValue.TIMESTAMP;
+        this.active = true; // Defaulting active to true for new issues
     }
+
+    // Getters and setters for all fields
 
     public void setTitle(String title) {
         this.title = title;
@@ -84,5 +89,13 @@ public class Model {
 
     public void setUser(String user) {
         this.user = user;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }
