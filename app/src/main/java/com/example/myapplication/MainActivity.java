@@ -67,19 +67,21 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Model model = snapshot.getValue(Model.class);
-                    String key = snapshot.getKey(); // This is the automatically generated ID by Firebase
+                    if (model != null && model.getActive()) {
+                        String key = snapshot.getKey(); // This is the automatically generated ID by Firebase
 
-                    Button button = new Button(MainActivity.this);
-                    button.setText(model.getTitle() + " (Votes: " + model.getVotes()+ ")");
-                    button.setOnClickListener(v -> {
-                        // Implement navigation logic here
-                        Intent intent = new Intent(MainActivity.this, DetailActivity.class);
-                        intent.putExtra("ID", key); // Pass the Firebase-generated ID to the detail activity
-                        startActivity(intent);
-                    });
+                        Button button = new Button(MainActivity.this);
+                        button.setText(model.getTitle() + " (Votes: " + model.getVotes() + ")");
+                        button.setOnClickListener(v -> {
+                            // Implement navigation logic here
+                            Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+                            intent.putExtra("ID", key); // Pass the Firebase-generated ID to the detail activity
+                            startActivity(intent);
+                        });
 
-                    // Add the button to the LinearLayout within the ScrollView
-                    buttonContainer.addView(button);
+                        // Add the button to the LinearLayout within the ScrollView
+                        buttonContainer.addView(button);
+                    }
                 }
             }
 

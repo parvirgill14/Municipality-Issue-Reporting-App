@@ -21,13 +21,67 @@ import com.squareup.picasso.Picasso;
 public class DetailActivity extends AppCompatActivity {
     private TextView title, desc, votes;
     private ImageView image;
-    private Button upvoteButton, downvoteButton;
+    private Button upvoteButton, downvoteButton, finishBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+        DatabaseReference adminRef = FirebaseDatabase.getInstance().getReference().child("admin");
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        // Check if the current user's ID exists in the admin node
+        adminRef.child(currentUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    // The user ID exists in the admin node, so this user is an admin
+                    setupAdminUI();
+                } else {
+                    // The user ID does not exist in the admin node, so this user is not an admin
+                    setupRegularUI();
+                }
+            }
 
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle potential errors, such as permission issues
+            }
+        });
+    }
+
+    private void setupAdminUI(){
+        setContentView(R.layout.activity_detail_admin);
+        setupUI();
+        finishBtn = findViewById(R.id.finishBtn);
+        finishBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String id = getIntent().getStringExtra("ID");
+                DatabaseReference issueRef = FirebaseDatabase.getInstance().getReference()
+                        .child("Issue").child(id);
+
+                // Update the isActive field for this issue
+                issueRef.child("active").setValue(false)
+                        .addOnSuccessListener(aVoid -> {
+                            // Successfully updated isActive in Firebase
+                            Toast.makeText(DetailActivity.this, "Issue marked as finished.", Toast.LENGTH_SHORT).show();
+                        })
+                        .addOnFailureListener(e -> {
+                            // Failed to update isActive
+                            Toast.makeText(DetailActivity.this, "Failed to update issue.", Toast.LENGTH_SHORT).show();
+                        });
+            }
+
+        });
+
+    }
+
+    private void setupRegularUI(){
+        setContentView(R.layout.activity_detail);
+        setupUI();
+    }
+
+    private void setupUI(){
         // Initialize TextViews and ImageView
         title = findViewById(R.id.show_title);
         desc = findViewById(R.id.show_Desc);
@@ -76,7 +130,9 @@ public class DetailActivity extends AppCompatActivity {
                 processVote(id, false); // false for downvote
             }
         });
-    }
+    };
+
+
 
     private void processVote(final String issueId, final boolean upVote) {
         final String userId = FirebaseAuth.getInstance().getCurrentUser().getUid(); // Get current user ID

@@ -7,11 +7,12 @@ public class Model {
     private double latitude,longitude, order;
     private int votes;
     private Object timestamp;
+    private Boolean active;
 
     public Model(){
 
     }
-    public Model(String title, String description, String imageURL, double latitude, double longitude, String user, int votes, double order){
+    public Model(String title, String description, String imageURL, double latitude, double longitude, String user, int votes, double order, boolean active){
         this.title = title;
         this.description = description;
         this.imageURL= imageURL;
@@ -21,6 +22,7 @@ public class Model {
         this.user = user;
         this.timestamp = ServerValue.TIMESTAMP;
         this.order = order;
+        this.active = active;
     }
 
     public void setTitle(String title) {
@@ -93,5 +95,13 @@ public class Model {
 
     public void setOrder(double order) {
         this.order = order;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 }
