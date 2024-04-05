@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -65,6 +66,7 @@ public class DetailActivity extends AppCompatActivity {
                         .addOnSuccessListener(aVoid -> {
                             // Successfully updated isActive in Firebase
                             Toast.makeText(DetailActivity.this, "Issue marked as finished.", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(DetailActivity.this, MainActivity.class));
                         })
                         .addOnFailureListener(e -> {
                             // Failed to update isActive
