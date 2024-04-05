@@ -1,6 +1,8 @@
 package com.example.myapplication;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -22,7 +24,7 @@ import com.squareup.picasso.Picasso;
 public class DetailActivity extends AppCompatActivity {
     private TextView title, desc, votes;
     private ImageView image;
-    private Button upvoteButton, downvoteButton, finishBtn;
+    private Button upvoteButton, downvoteButton, finishBtn, mapsBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,10 +52,12 @@ public class DetailActivity extends AppCompatActivity {
         });
     }
 
+    @SuppressLint("MissingInflatedId")
     private void setupAdminUI(){
         setContentView(R.layout.activity_detail_admin);
         setupUI();
         finishBtn = findViewById(R.id.finishBtn);
+        mapsBtn = findViewById(R.id.mapsButton);
         finishBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -74,6 +78,41 @@ public class DetailActivity extends AppCompatActivity {
                         });
             }
 
+        });
+
+        mapsBtn.setOnClickListener(view -> {
+            String id = getIntent().getStringExtra("ID");
+            DatabaseReference issueRef = FirebaseDatabase.getInstance().getReference().child("Issue").child(id);
+
+            // Fetch the issue details once to retrieve latitude and longitude
+            issueRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    Model issue = dataSnapshot.getValue(Model.class);
+                    if (issue != null) {
+                        double latitude = issue.getLatitude();
+                        double longitude = issue.getLongitude();
+
+                        // Construct and launch the Google Maps directions intent
+                        Uri gmmIntentUri = Uri.parse("google.navigation:q=" + latitude + "," + longitude);
+                        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                        mapIntent.setPackage("com.google.android.apps.maps");
+
+                        if (mapIntent.resolveActivity(getPackageManager()) != null) {
+                            startActivity(mapIntent);
+                        } else {
+                            Toast.makeText(DetailActivity.this, "Google Maps is not installed", Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        Toast.makeText(DetailActivity.this, "Issue details not found.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    Toast.makeText(DetailActivity.this, "Failed to get issue details.", Toast.LENGTH_SHORT).show();
+                }
+            });
         });
 
     }
