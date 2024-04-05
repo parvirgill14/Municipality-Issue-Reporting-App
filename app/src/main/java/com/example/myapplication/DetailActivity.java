@@ -5,8 +5,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -51,9 +53,7 @@ public class DetailActivity extends AppCompatActivity {
                     title.setText(model.getTitle());
                     desc.setText(model.getDescription());
                     votes.setText(String.valueOf(model.getVotes())); // votes is an int
-                    Picasso.get()
-                            .load(model.getImageURL())
-                            .into(image);
+                    Picasso.get().load(model.getImageURL()).into(image);
                 }
             }
 
@@ -66,50 +66,61 @@ public class DetailActivity extends AppCompatActivity {
         upvoteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                updateVoteCount(id, true); // true for upvote
+                processVote(id, true); // true for upvote
             }
         });
 
         downvoteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                updateVoteCount(id, false); // false for downvote
+                processVote(id, false); // false for downvote
             }
         });
     }
 
-    private void updateVoteCount(String issueId, boolean upvote) {
-        DatabaseReference issueRef = FirebaseDatabase.getInstance().getReference().child("Issue").child(issueId);
-        issueRef.runTransaction(new Transaction.Handler() {
-            @NonNull
+    private void processVote(final String issueId, final boolean upVote) {
+        final String userId = FirebaseAuth.getInstance().getCurrentUser().getUid(); // Get current user ID
+        final DatabaseReference issueRef = FirebaseDatabase.getInstance().getReference().child("Issue").child(issueId);
+        final DatabaseReference userVoteRef = issueRef.child("userVotes").child(userId);
+
+        userVoteRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
-                Model issue = mutableData.getValue(Model.class);
-                if (issue == null) {
-                    return Transaction.success(mutableData);
-                }
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.exists()) {
+                    // User hasn't voted, allow voting
+                    issueRef.runTransaction(new Transaction.Handler() {
+                        @NonNull
+                        @Override
+                        public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                            Model issue = mutableData.getValue(Model.class);
+                            if (issue == null) {
+                                return Transaction.success(mutableData);
+                            }
+                            if (upVote) {
+                                issue.setVotes(issue.getVotes() + 1);
+                            } else {
+                                issue.setVotes(issue.getVotes() - 1);
+                            }
+                            mutableData.setValue(issue);
+                            return Transaction.success(mutableData);
+                        }
 
-                if (upvote) {
-                    issue.setVotes(issue.getVotes() + 1);
+                        @Override
+                        public void onComplete(DatabaseError databaseError, boolean committed, DataSnapshot dataSnapshot) {
+                            if (committed) {
+                                userVoteRef.setValue(true); // Mark this user as having voted
+                                votes.setText(String.valueOf(dataSnapshot.getValue(Model.class).getVotes()));
+                            }
+                        }
+                    });
                 } else {
-                    issue.setVotes(issue.getVotes() - 1);
+                    runOnUiThread(() -> Toast.makeText(DetailActivity.this, "You have already voted on this issue.", Toast.LENGTH_SHORT).show());
                 }
-
-                mutableData.setValue(issue);
-                return Transaction.success(mutableData);
             }
 
             @Override
-            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-                if (databaseError != null) {
-                    System.out.println("Firebase voting transaction failed.");
-                } else {
-                    System.out.println("Firebase voting transaction succeeded.");
-                    Model updatedIssue = dataSnapshot.getValue(Model.class);
-                    if (updatedIssue != null) {
-                        votes.setText(String.valueOf(updatedIssue.getVotes()));
-                    }
-                }
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle possible errors
             }
         });
     }
