@@ -195,8 +195,10 @@ public class DetailActivity extends AppCompatActivity {
                             }
                             if (upVote) {
                                 issue.setVotes(issue.getVotes() + 1);
+                                issue.setOrder(issue.getOrder() - 1);
                             } else {
                                 issue.setVotes(issue.getVotes() - 1);
+                                issue.setOrder(issue.getOrder() + 1);
                             }
                             mutableData.setValue(issue);
                             return Transaction.success(mutableData);
